@@ -8,12 +8,20 @@
     ***** STRING *****
 """
 
+
+from typing import Union
+from functools import reduce
+from itertools import accumulate, combinations, combinations_with_replacement, count, cycle, repeat, groupby
+from itertools import permutations
+from itertools import product
 from collections import defaultdict, deque
 from collections import OrderedDict
 from collections import namedtuple
 from collections import Counter
-from timeit import default_timer as timer
+import operator
+from timeit import default_timer as timer, repeat
 import math
+from numpy import double
 my_list = ['a'] * int(math.pow(10, 6))
 
 
@@ -138,3 +146,217 @@ d.rotate(2)  # rotate right
 print(d)
 d.rotate(-2)  # rotate left
 print(d)
+
+"""
+    ***** ITERATORS  *****
+        IterTools - collections of tools to handle iterators. Iterators are data types that can be used in a For Loop.
+        most common iterators - List and offer some advance tools
+    
+    https://docs.python.org/3/library/itertools.html
+
+    Few Iterator tools:
+    1. Product ->
+    2. Permutations ->
+    3. Combinations ->
+    4. Accumulate -> 
+    5. GroupBy ->
+    6. Infinite Iterators -> 
+"""
+
+# Product -> product(A, B) returns the same as: ((x,y) for x in A for y in B)
+
+a = [1, 3]
+b = [4]
+
+_prd = product(a, b)
+prd = product(a, b, repeat=2)  # repeatable of iterables
+print(list(_prd), list(prd))
+
+
+# Permutations
+
+
+a = [1, 2, 3]
+perm = permutations(a)
+perm_custom_len = permutations(a, 2)
+print(list(perm))
+print(list(perm_custom_len))
+
+# combinations and combinations_with_replacement (repeating with same)
+
+a = [1, 2, 4, 5]
+comb = combinations(a, 3)  # note - length mandatory unlike permutations
+comb_custom_len = combinations(a, 4)
+
+print(list(comb))
+print(list(comb_custom_len))
+
+rep_comb = combinations_with_replacement(a, 3)
+print(list(rep_comb))
+
+# Accumulate - returns accumulated sums (e.g cumulative sums, cumulative mul using operators - factorial)
+
+a = [1, 2, 3, 8, 4, 5, 6]
+accum = accumulate(a)
+mul_accum = accumulate(a, func=operator.mul)  # e.g finding factorial
+# return maxm num until now e.g [1, 2, 3, 8, 4, 5, 6] -> [1, 2, 3, 8, 8, 8, 8]
+max = accumulate(a, func=max)
+print(list(accum), list(mul_accum), list(max))
+
+# GROUP BY - returns iterators for keys and groups
+a = [1, 2, 3, 4]
+
+
+def smaller_than_3(x):
+    return x < 3
+
+
+# group list into 2 groups < 3 and >= 3
+group_obj_lamb = groupby(a, key=lambda d: d < 3)
+group_obj = groupby(a, key=smaller_than_3)
+
+for key, val in group_obj_lamb:
+    print(key, list(val))
+
+for key, val in group_obj:
+    print(key, list(val))
+
+persons = [
+    {'name': 'Tim', 'age': 25}, {'name': 'Swq', 'age': 25},
+    {'name': 'David', 'age': 29}, {'name': 'Koo', 'age': 28},
+]
+
+person_group_age = groupby(persons, key=lambda p: p['age'] <= 25)
+
+person_auto_group_age = groupby(
+    persons, key=lambda p: p['age'])  # no need to define key conditonal group
+for key, val in person_group_age:
+    print(key, list(val))
+
+for key, val in person_auto_group_age:
+    print(key, list(val))
+
+# INFINITE Iteratoes - count, cycle, repeat
+
+for i in count(10):  # runs infinite counter - break on some condition
+    print(i)
+    if i == 15:
+        break
+
+a = [1, 2, 3]
+
+for idx, n in enumerate(cycle(a)):
+    print(n)
+    if idx == 3*len(a):
+        break
+
+# print(list(repeat(25, 4)))
+
+"""
+    ***** LAMBDA Functions  ***** -> use on the fly
+        used when you need to use that function only once or pass function as argument to Higher Order Function 
+        (e.g builtin method sorted_map, filter, reduce, map)
+"""
+def add10(x): return x + 10
+
+
+print(add10(5))
+
+
+def mult(x, y): return x*y
+
+
+print(mult(3, 4))
+
+# sorted
+point2D = [(1, 2), (15, 1), (5, -1), (10, 4)]
+point2D_sorted = sorted(point2D, key=lambda x: x[0]+x[1])
+
+print(point2D_sorted)
+
+# map(func, seq)
+a = [1, 2, 3, 4, 5]
+double_a = map(lambda x: x*2, a)
+double_a_using_list_comprehension = [x*2 for x in a]  # prefer this
+
+print(list(double_a), double_a_using_list_comprehension)
+
+# filter(func, seq)
+a = [1, 2, 3, 4, 5, 6, 7, 8]
+a_even_filter = filter(lambda x: x % 2 == 0, a)
+
+print(list(a_even_filter))
+
+# reduce(func, seq)
+a = [1, 2, 3, 4, 5, 6, 7, 8]
+product_a_reduce = reduce(lambda x, y: x*y, a)
+
+print(product_a_reduce)
+
+"""
+    ***** EXCEPTION Functions  ***** -> python program terminates on exception or syntax error, so handle properly
+
+Syntax-Error vs Exception : 
+Exception - builtin exception and define your own by extending Exception class
+        - Raise a exception when you want to force exception to occur
+"""
+
+x = 5
+if x < 0:
+    raise Exception("This is normal exception")
+
+assert x >= 0, "This is another way to raise Assertion Error"
+print('Wont run after exception raise')
+
+# handle exception using catch
+try:
+    x = 5 / 0
+except Exception as e:
+    print(f"Exception caught! {e}")
+    # raise Exception("Not divisible by 0 error") # if not raised program won't stop
+
+print("Exception caught")
+
+# compound exception handling - else(actual valid operation) and finally(used for clean up operation)
+try:
+    x = 5 / 1
+    d = 5 + '10'
+except ZeroDivisionError as e:
+    print(e)
+except TypeError as e:
+    print(e)
+else:
+    print("All fine - No exception catched")
+finally:
+    print("This will always run")
+
+# defining custom Exception
+
+
+class ValueTooHighError(Exception):
+    pass
+
+
+class ValueTooSmallError(Exception):
+    def __init__(self, message: str, value: Union[int, float]) -> None:
+        self.message = message
+        self.value = value
+
+
+def test_high_val(x):
+    if x > 500:
+        raise ValueTooHighError("value higher than 500")
+    if x < 1:
+        raise ValueTooSmallError("Value too small error", x)
+
+
+try:
+    test_high_val(-567)
+except ValueTooHighError as e:
+    print(e)
+except ValueTooSmallError as e:
+    print(e.message, e.value)
+
+"""
+    ***** LOGGING  *****
+"""
