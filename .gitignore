@@ -1,3 +1,8 @@
 sense_related/*
 .vscode/*
 .idea/*
+__pycache__/
+*.py[cod]
+*$py.class
+.*/pycache/*
+myEnv
